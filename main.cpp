@@ -1,3 +1,7 @@
+// temp4.cpp : Defines the entry point for the console application.
+//
+
+//#include "stdafx.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -13,7 +17,7 @@ double evaluate(string expression);
 int prec(char c);
 string replaceValue(string line, string variable, int value);
 string addWhiteSpace(string &temp);
-bool isOperator(char c);
+std::string ReplaceAll(std::string &str, const std::string& from, const std::string& to);
 
 int main(int argc, const char * argv[]) {
 
@@ -30,7 +34,7 @@ int main(int argc, const char * argv[]) {
 	bool inStringPrint = false;
 
 	input.open("/Users/guillermo/Desktop/Homework 2/Homework 2/text.py");
-
+	//input.open("myFile.txt");
 
 
 	if (!input) {
@@ -120,13 +124,14 @@ int main(int argc, const char * argv[]) {
 				}
 
 				if (i == (line.size() - 1) && assignmentLine) {
-					
 
 					if (inFunction) {
+						addWhiteSpace(temp);
 						for (int x = 0; x<functionArrayIndex; x++) {
-							size_t found = temp.find(functionVariableNames[x]);
+							string toFind = " " + functionVariableNames[x] + " ";
+							size_t found = temp.find(toFind);
 							if (found != string::npos) {
-								temp.replace(found, functionVariableNames[x].size(), to_string(functionVariableValues[x]));
+								ReplaceAll(temp, toFind, to_string(functionVariableValues[x]));
 							}
 						}
 
@@ -137,7 +142,7 @@ int main(int argc, const char * argv[]) {
 							string toFind = " " + variableNames[x] + " ";
 							size_t found = temp.find(toFind);
 							if (found != string::npos) {
-								temp.replace(found, toFind.size(), to_string(variableValues[x]));
+								ReplaceAll(temp, toFind, to_string(variableValues[x]));
 							}
 						}
 					}
@@ -154,20 +159,26 @@ int main(int argc, const char * argv[]) {
 			}
 		}
 	}
-	/*
-	for (int i = 0; i < 4; i++) {
+	/*for (int i = 0; i < 3; i++) {
 	cout << functionVariableNames[i] << "= " << functionVariableValues[i] << endl;
 	}
-	
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 3; i++) {
 	cout << variableNames[i] << variableValues[i] << endl;
-	}
-	getchar();
-	*/
+	}*/
 	return 0;
 }
+
+std::string ReplaceAll(std::string &str, const std::string& from, const std::string& to) {
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+		str.replace(start_pos, from.length(), to);
+		start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+	}
+	return str;
+}
+
 bool isOperator(char temp) {
-	string operators = "+-*/";
+	string operators = "+-*/=<>()";
 	bool itIs = false;
 	for (int i = 0; i < operators.size(); i++) {
 		if (temp == operators[i]) {
@@ -180,6 +191,7 @@ bool isOperator(char temp) {
 string addWhiteSpace(string &temp) {
 	string white = " ";
 	int k = 0;
+	bool functionFound = false;
 	while (k < temp.size()) {
 		if (k == 0) {
 			//cout << "enter if" << "k=" << k<<  endl;
@@ -201,6 +213,11 @@ string addWhiteSpace(string &temp) {
 			//cout << "value of temp after elseif2:" << temp << endl;
 
 		}
+
+		else if (temp[k - 1] == ')') {
+			temp.insert(k, white);
+			k++;
+		}
 		else if (k == temp.size() - 1) {
 			const char *p;
 			p = " ";
@@ -215,6 +232,7 @@ string addWhiteSpace(string &temp) {
 	}
 	return temp;
 }
+
 
 double evaluate(string expr)
 {
